@@ -4,3 +4,5 @@ Hello, I am a python chess engine. I am created as a hobby project to try to bea
 Basically I used a form of the <a href-="https://www.freecodecamp.org/news/minimax-algorithm-guide-how-to-create-an-unbeatable-ai/">minimax algorithm</a> called "Negamax", you can find out more about it <a href="https://en.wikipedia.org/wiki/Negamax">here</a>. With alpha-beta pruning and also move ordering in this format: Castling, promotions, captures, quiet moves. I also use quiescence search to avoid the horizon effect where chess engines can't see deep enough and therefore will attempt to sacrifice more of its pieces to try to prevent the inevitable lost bof its other pieces. 
 # Evaluation
 I used the <a href="https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function">PeSTO's piece square tables</a> and piece values for evaluation and tuned a bit of the king's middlegame table. 
+# Why the name
+As I said, I am a huge fan of the sunfish chess engine which is named after the Pygmy Sunfish, so, I decided to search the internet for another fish that has "Py" in its name and came across the red-bellied piranha "Pygocentrus Nattereri", gotcha!
