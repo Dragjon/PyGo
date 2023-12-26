@@ -265,24 +265,28 @@ def quiescence_search(board, color, alpha, beta, ply):
 
 def mvv_lva(board, move):
 
-    if board.can_claim_draw() or board.is_stalemate() or board.is_insufficient_material():
-            return 0
-
-    if board.is_checkmate():
-            return -10000+ply
-    
     # Get the piece at the destination square, or None if the square is empty
     to_piece = board.piece_at(move.to_square)
 
     # Get the piece at the source square, or None if the square is empty
     from_piece = board.piece_at(move.from_square)
 
+    # Prioritize castling moves
+    if board.is_castling(move):
+        return 1000
+
+    # Prioritize promotions
+    if move.promotion is not None:
+        promotion_value = piece_values_midgame[move.promotion] - piece_values_midgame[chess.PAWN]
+        return promotion_value
+
     # Calculate MVV-LVA score for a move
     if to_piece is not None and from_piece is not None:
         return piece_values_midgame[to_piece.piece_type] - piece_values_midgame[from_piece.piece_type]
     else:
-        # If either square is empty, return a low score
+        # Return a low score for quiet moves
         return -1  # You can adjust this value based on your preferences
+
 
 
 def negamax(board, depth, color, alpha, beta, ply, nodes):
@@ -311,6 +315,7 @@ def negamax(board, depth, color, alpha, beta, ply, nodes):
 
     return alpha, nodes
 
+transposition_table = {}
 
 def best_move(board, start_time, max_time, depth):
     if board.turn == chess.WHITE:
@@ -337,15 +342,7 @@ def best_move(board, start_time, max_time, depth):
         elapsed_time = time.time() - start_time
         if elapsed_time >= max_time:
             return best_mv  # Exit the function immediately if max_time is reached
-        ordered_moves = sorted(
-            board.legal_moves,
-            key=lambda move: (
-                -piece_values_midgame[board.piece_at(move.to_square).piece_type]
-                if board.piece_at(move.to_square) is not None else 0,
-                -piece_values_midgame[board.piece_at(move.from_square).piece_type]
-                if board.piece_at(move.from_square) is not None else 0
-            )
-        )
+        ordered_moves = sorted(board.legal_moves, key=lambda move: mvv_lva(board, move), reverse=True)
 
         for move in ordered_moves:
             board.push(move)
@@ -360,7 +357,7 @@ def best_move(board, start_time, max_time, depth):
                 alpha = eval
                 best_mv = move
 
-        print(f"info depth {current_depth} score cp {alpha} nps {int(nodes/max(0.01, elapsed_time))} time {int(elapsed_time*100)} pv {best_mv.uci()}")
+        print(f"info depth {current_depth} score cp {alpha} nps {int(nodes/max(0.01, elapsed_time))} time {int(elapsed_time*1000)} pv {best_mv.uci()}")
 
     return best_mv
 
